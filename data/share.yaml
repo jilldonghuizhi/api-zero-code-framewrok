@@ -1,16 +1,31 @@
-# 共享方法常量（API 用 method: "${methods.POST}" 引用）
+# -*- coding: utf-8 -*-
+# 公共默认数据（share 默认 → env 覆盖，深合并）
+# 用例 YAML 只写结构/逻辑，具体值用 ${...} 引用本文件中的常量；值与结构分离。
+
+# 共享方法常量（两种写法都支持：method: "${POST}" 或 "${methods.POST}"）
+GET: get
+POST: post
+PUT: put
+DELETE: delete
+PATCH: patch
+
 methods:
   GET: get
   POST: post
   PUT: put
   DELETE: delete
   PATCH: patch
+
 # 预期值常量（断言用 expected: "${expect.success_code}" 引用；注意 flow 映射内加引号）
 expect:
   success_code: "200"      # 该服务端成功业务码（多为字符串 "200"；有的服务端是 0，按实际改）
   http_ok: 200
+
 # 全局默认头（executor 作为默认层注入；接口/with 可覆盖同名）
 default_headers:
   Content-Type: application/json
-  Accept: application/json
-# 注：账号密码/token 等环境专属敏感值不要放这里，放 data/<env>.yaml（见下方模板）
+
+# 业务数据常量示例（账号密码等环境专属/敏感值放 data/<env>.yaml）
+login:
+  valid_credential: { username: "dev_user", password: "dev_pass" }
+  invalid_credential: { username: "wrong", password: "wrong" }

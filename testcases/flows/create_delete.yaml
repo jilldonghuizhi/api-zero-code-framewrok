@@ -1,0 +1,8 @@
+# 业务模板（testcases/flows/）：一个文件 = 一条用例（新增此文件即新增一条用例，无需改 Python）
+feature: 
+story: Cart
+title: 删除新创建的cart
+steps:                                # 顺序引用单 API 文件（也可 include 另一份 flows/ 业务，嵌套展开）
+  - include: apis/create_cart.yaml
+  - include: apis/delete_cart.yaml
+ 

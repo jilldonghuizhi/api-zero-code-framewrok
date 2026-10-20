@@ -1,0 +1,10 @@
+# 单 API 模板（testcases/apis/）：一个文件 = 一个可复用 API，不直接被收集
+# 使用方式：在 testcases/flows/ 的业务文件里用 steps: - include: apis/your_api.yaml 引用
+name: Create a new 
+request:
+  method: "${POST}"          # 引用 data/share.yaml 的方法常量（勿硬编码 post/get）
+  url: /carts  
+extract_global:
+    cartId: [json, $.id, ""]             
+validate:                            # 多类型软断言（本 API 内全部执行后汇总）
+  - status_code: { name: HTTP200, expected: "201" }
