@@ -1,0 +1,8 @@
+# 生产环境专属覆盖（由 --env prod 或 TEST_ENV=prod 选择；深合并覆盖 share.yaml）
+# 账号密码等敏感值建议改用环境变量注入，不提交明文
+login:
+  valid:
+    username: prod_user
+    password: prod_pass
+# demo:
+#   path: /prod/demo/path

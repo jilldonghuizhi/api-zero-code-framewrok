@@ -1,0 +1,13 @@
+# 业务模板（testcases/flows/）：一个文件 = 一条用例（新增此文件即新增一条用例，无需改 Python）
+feature: 示例模块
+story: 示例业务
+title: 示例业务链路
+steps:                                # 顺序引用单 API 文件（也可 include 另一份 flows/ 业务，嵌套展开）
+  - include: apis/your_api.yaml
+  - include: apis/your_api.yaml       # 同一份 API 复用第二次：用 with 覆盖即衍生新场景
+    name: 示例接口-无效ID
+    with:
+      json: { id: 1 }                 # 覆盖请求体
+      validate:                       # 覆盖断言（正向/反向用例复用同一份定义）
+        - not_equals: { name: 拒绝无效ID, actual: $.code, expected: 0 }
+  # - include: flows/子业务.yaml      # 嵌套业务，递归展开为 父业务::子业务::API

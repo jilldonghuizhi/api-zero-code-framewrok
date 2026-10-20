@@ -1,0 +1,9 @@
+# 开发环境专属覆盖（由 config.yaml 的 env=dev 或 --env dev 选择；深合并覆盖 share.yaml）
+# 账号密码/token 等敏感值定义在这里，不放 share.yaml
+login:
+  valid:
+    username: dev_user
+    password: dev_pass
+# 示例：环境专属的接口路径/租户等差异值
+# demo:
+#   path: /dev/demo/path

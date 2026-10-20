@@ -1,0 +1,38 @@
+# 统一配置：被测服务 / 环境 / 请求 / 报告 / 邮件
+# 顶层字段可用同名大写环境变量覆盖（如 BASE_URL、ENV、TIMEOUT）
+
+# 被测服务地址（运行必需）：改为真实服务地址，如 https://api.xxx.com
+# 未配置时运行直接报错（不收集、不 skip，禁止无服务空跑）
+base_url: "https://api.practicesoftwaretesting.com/"
+
+# 运行环境：dev / prod，对应 data/<env>.yaml（可用 --env 或 TEST_ENV 覆盖）
+env: dev
+
+# 报告 Environment 控件展示用（可选）
+app: api-zero-code-framework
+device: ci
+
+# 请求默认参数
+timeout: 30        # 单请求超时（秒）
+retries: 1         # 连接错误/超时重试次数（HTTP 4xx/5xx 不重试）
+verify: true       # HTTPS 证书校验
+
+# 鉴权：全局 Token（可选）。已有 Authorization 头时不覆盖；登录接口可用 extract_global 提取 ${token}
+token: ""
+
+report:
+  allure_dir: allure-results
+  report_dir: reports/allure-report
+  json_path: reports/report.json
+
+mail:
+  smtp_host: ""                 # 例：smtp.qq.com / smtp.feishu.cn
+  smtp_port: 465
+  smtp_user: ""                 # 发件邮箱
+  smtp_password: ""             # 建议留空，用环境变量 MAIL_SMTP_PASSWORD 注入，勿提交明文
+  sender: ""
+  receivers: []                 # 收件人列表，如 ["qa@example.com"]
+  use_ssl: true                 # 465 端口用 SSL；587 用 use_ssl=false + use_tls=true
+  use_tls: false
+  subject_prefix: "[API 自动化]"
+  attach_report: true           # 附件打包 Allure 报告 zip

@@ -1,0 +1,25 @@
+# GitLab CI 示例：安装依赖 → 跑 scripts/run_tests.py → 上传产物
+stages:
+  - test
+
+api-tests:
+  stage: test
+  image: python:3.11
+  variables:
+    TEST_ENV: "dev"
+    AUTO_OPEN_REPORT: "false"
+    ENABLE_ALLURE_REPORT: "true"
+    ENABLE_EMAIL_REPORT: "false"
+  before_script:
+    - python -m pip install --upgrade pip
+    - pip install -r requirements.txt
+  script:
+    - python scripts/run_tests.py --env "$TEST_ENV" --no-open --email off
+  artifacts:
+    when: always
+    reports:
+      junit: reports/junit.xml
+    paths:
+      - allure-results/
+      - reports/allure-report/
+      - reports/junit.xml
