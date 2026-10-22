@@ -1,0 +1,8 @@
+name: get_brands
+request:
+  method: ${GET}              
+  url: /brands         
+extract:                     
+  brand_id: [json, $.id, ""]
+validate:                            # 多类型软断言（失败汇总）
+  - status_code: { name: , expected: 200 }  

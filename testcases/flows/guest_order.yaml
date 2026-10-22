@@ -1,0 +1,9 @@
+# testcases/flows/your_flow.yaml —— 业务模板（一个文件 = 一个 case）
+# steps 按顺序引用多个单 API 文件（或嵌套另一份 flows/ 业务）；每个 step 可附加 with 覆盖本次调用。
+# 把 <...> 占位符换成真实值即可。新增一个 YAML 文件即新增一条用例，无需改 Python。
+title: guest_order
+steps:                               # 业务 = 多个单 API / 子业务组合（顺序执行）
+  - include: apis/get_categories.yaml
+  - include: apis/get_brands.yaml
+  - include: apis/get_products.yaml
+   

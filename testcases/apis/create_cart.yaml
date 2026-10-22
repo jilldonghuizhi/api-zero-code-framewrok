@@ -3,7 +3,7 @@
 name: Create a new 
 request:
   method: "${POST}"          # 引用 data/share.yaml 的方法常量（勿硬编码 post/get）
-  url: /carts  
+  url: /carts 
 extract_global:
     cartId: [json, $.id, ""]             
 validate:                            # 多类型软断言（本 API 内全部执行后汇总）

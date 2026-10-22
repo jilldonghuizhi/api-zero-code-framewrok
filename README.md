@@ -7,13 +7,14 @@
 
 | 能力 | 说明 |
 | --- | --- |
-| 零代码用例 | `testcases/apis/`（单 API 组件）+ `testcases/flows/`（业务编排）放 `.yaml` 即被自动收集 |
+| 零代码用例 | `testcases/apis/`（单 API 组件，不直接收集）+ `testcases/flows/`（业务编排，**每个文件 = 一个 pytest Item**）放 `.yaml` 即被自动收集 |
 | 复用三层 | ① 一份 `apis/` 文件被多个 `flows/` 引用；② `flows/` 可嵌套引用另一份 `flows/`；③ `with` 覆盖本次调用的 `request`/`validate`/`extract` |
-| 多类型软断言 | `equals`/比较/包含/集合/长度/类型/正则/存在性/schema/状态码；一个 API 内全部执行后汇总 |
-| 链路硬停止 | 业务内任一 API 失败 → 本 case 失败，后续 API 不再执行 |
-| 失败留证 | 请求/响应快照写入 `artifacts/` 并挂载到 Allure（含内联「失败详情」） |
-| 失败重试 | 交由 `pytest-rerunfailures`（`pytest.ini` 的 `--reruns 1 --reruns-delay 1`），Allure 生成 Retries 视图 |
-| Allure 报告 | 会话结束自动 `allure generate`（复用 `history` 带趋势）并可 detached 打开 |
+| 多类型软断言 | `equals`/比较/包含/集合/长度/类型/正则/存在性/schema/状态码；一个 API 内全部执行后汇总；**期望/实值带类型**（如 `期望 == '200' (str) | 实际 '1004' (str)`） |
+| 链路硬停止 | 业务内任一 API 失败 → 本 case 失败，后续 API 不再执行（日志带 `⏭️  API「x」已跳过：上游 API『y』执行失败…`） |
+| 失败留证 | 请求/响应快照写入 `artifacts/` 并挂载到 Allure（含内联「失败详情」）；`ApiItem.repr_failure` 返回可读摘要，不附框架堆栈 |
+| Content-Type 驱动体编码 | 按最终 `Content-Type` 决定 `requests` 的 `json=`/`data=`，避免「Content-Type 写了表单但传了 json」 |
+| 失败重试 | 交由 `pytest-rerunfailures`（`pytest.ini` 的 `--reruns 1 --reruns-delay 1`），Allure 生成 Retries 视图；`report.json` 按 historyId 去重 |
+| Allure 报告 | 会话结束自动 `allure generate`（复用 `history` 带趋势）；默认不开自动打开（CI 设 false，本地可 `auto_open_report=true`） |
 | 邮件通知 | 按开关发送 HTML 摘要邮件（含失败现场），默认打包报告 zip；缺配置仅告警不阻断 |
 | 多环境 | `--env dev/prod` 或 `TEST_ENV` 选择 `data/<env>.yaml`，零改动切换 |
 | CI/CD | `scripts/run_tests.py` 统一入口 + GitHub Actions / GitLab CI 示例 |
@@ -71,15 +72,16 @@ npm install -g allure-commandline        # 或 scoop/choco/brew/apt 安装，或
 
 ## 四、如何添加测试用例（零代码）
 
-### 步骤 1：定义单 API（`testcases/apis/your_api.yaml`）
+### 步骤 1：定义单 API（`testcases/apis/login.yaml`）
 
 ```yaml
-name: 示例接口
+name: 登录接口
 request:
-  method: "${methods.POST}"        # 引用 data/share.yaml 的常量，勿硬编码
-  url: /demo/path                  # 相对路径，自动拼接 config.yaml 的 base_url
-  json: { key: value }             # 收 JSON 用 json:；收表单用 form:
-extract_global:                    # 跨业务共享，下游用 ${shared_value} 取
+  method: "${POST}"                # 引用 data/share.yaml 的扁平常量（POST/GET/...），勿硬编码
+  url: /user/login
+  headers: { Content-Type: "application/x-www-form-urlencoded" }
+  form:   "${login.valid_credential}"     # 收表单必走 form:，别用 json:（见下文「请求体类型」）
+extract_global:                    # 跨业务共享（下游业务用 ${token} 取）
   shared_value: [json, $.data.shared_value, ""]
 validate:                          # 多类型软断言
   - status_code: { name: HTTP200, expected: "${expect.http_ok}" }
@@ -89,22 +91,21 @@ validate:                          # 多类型软断言
       expected: "${expect.success_code}"
 ```
 
-### 步骤 2：编排业务（`testcases/flows/your_flow.yaml`）——一个文件即一条用例
+### 步骤 2：编排业务（`testcases/flows/查询我的书架.yaml`）——一个文件即一条用例
 
 ```yaml
-feature: 示例模块
-story: 示例业务
-title: 示例业务链路
+title: 查询我的书架
 steps:
-  - include: apis/your_api.yaml
-  - include: apis/your_api.yaml          # 复用同一份 API
-    name: 示例接口-无效ID
+  - include: apis/login.yaml                     # 登录：extract_global 把 token 写入全局
+  - include: apis/self_book.yaml                 # 用 ${token}（Authorization 放裸 token）查询书架
+  - include: apis/login.yaml                     # 同一定义衍生反向用例：覆盖表单 + 断言
     with:
-      json: { id: 1 }                    # 覆盖请求体
-      validate:                          # 覆盖断言，衍生正向/反向用例
-        - not_equals: { name: 拒绝无效ID, actual: $.code, expected: 0 }
-  # - include: flows/子业务.yaml          # 嵌套业务，递归展开
+      form: ${login.invalid_credential}
+      validate:
+        - equals: { name: 拒绝无效账号, actual: $.code, expected: "1004" }
 ```
+
+`with` 推荐写法是**顶层直平铺**（`{url:..., form:..., validate:...}`）；也兼容 `with: {request: {...}, validate: ...}` 嵌套写法。
 
 要点：
 
