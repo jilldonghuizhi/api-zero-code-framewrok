@@ -36,7 +36,6 @@ jobs:
 
       - name: 执行接口测试
         env:
-          BASE_URL: ${{ secrets.BASE_URL }}
           MAIL_SMTP_PASSWORD: ${{ secrets.MAIL_SMTP_PASSWORD }}
         run: python scripts/run_tests.py --env ${{ inputs.env || 'dev' }} --no-open --email off
 

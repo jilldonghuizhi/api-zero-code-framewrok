@@ -23,18 +23,18 @@ class ConfigReader:
         return {}
 
     def get(self, key: str, default: Any = None) -> Any:
-        """顶层字段；环境变量 KEY(大写) 优先。"""
+        """顶层字段；环境变量 KEY(大写) 优先；环境变量为空字符串时不覆盖配置文件。"""
         env = os.environ.get(key.upper())
-        if env is not None:
+        if env is not None and env.strip() != "":
             return _coerce(env)
         return self._data.get(key, default)
 
     def get_section(self, section: str) -> Dict[str, Any]:
-        """整段读取；节内子键支持 {SECTION}_{SUBKEY}(大写) 环境变量覆盖。"""
+        """整段读取；节内子键支持 {SECTION}_{SUBKEY}(大写) 环境变量覆盖（空值不覆盖）。"""
         base = dict(self._data.get(section, {}) or {})
         prefix = f"{section.upper()}_"
         for k, v in os.environ.items():
-            if k.startswith(prefix):
+            if k.startswith(prefix) and v.strip() != "":
                 base[k[len(prefix):].lower()] = _coerce(v)
         return base
 

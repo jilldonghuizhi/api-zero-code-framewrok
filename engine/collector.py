@@ -40,7 +40,9 @@ def _resolve_env(spec) -> str:
     if not base_url:
         raise RuntimeError(
             "config.yaml 未配置 base_url，无法执行测试。"
-            "请在 config/config.yaml 中配置被测服务地址 base_url（如 http://127.0.0.1:8080）。")
+            "请在 config/config.yaml 中配置被测服务地址 base_url（如 http://127.0.0.1:8080）。"
+            f" [诊断] 配置文件={getattr(cfg, '_path', 'config/config.yaml')}；"
+            f"BASE_URL 环境变量={os.environ.get('BASE_URL', '<未设置>')!r}")
     return str(base_url).strip().rstrip("/")
 
 
