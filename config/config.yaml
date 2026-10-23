@@ -21,13 +21,13 @@ report:
   json_path: reports/report.json
 
 mail:
-  smtp_host: ""                 # 例：smtp.qq.com / smtp.feishu.cn
+  smtp_host: "smtp.163.com"                 # 例：smtp.qq.com / smtp.feishu.cn
   smtp_port: 465
-  smtp_user: ""                 # 发件邮箱
+  smtp_user: "donghuizhi123@163.com"                 # 发件邮箱
   smtp_password: ""             # 建议留空，用环境变量 MAIL_SMTP_PASSWORD 注入，勿提交明文
-  sender: ""
-  receivers: []                 # 收件人列表，如 ["qa@example.com"]
+  sender: "donghuizhi123@163.com"
+  receivers: [donghuizhi@beyondsoft.com]                 # 收件人列表，如 ["qa@example.com"]
   use_ssl: true                 # 465 端口用 SSL；587 用 use_ssl=false + use_tls=true
   use_tls: false
-  subject_prefix: "[API 自动化]"
+  subject_prefix: "[Tool shop API 自动化]"
   attach_report: true           # 附件打包 Allure 报告 zip
